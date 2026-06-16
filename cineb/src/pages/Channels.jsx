@@ -16,7 +16,8 @@ const CARTOON_CHANNELS = [
     { id: 'animax', name: 'Animax', networkId: 204, query: 'Naruto', description: 'Anime network' },
     { id: 'pogo', name: 'Pogo TV', networkId: 1046, query: 'Chhota Bheem', description: 'Indian kids channel' },
     { id: 'toonami', name: 'Toonami', networkId: 878, query: 'Batman', description: 'Action animation' },
-    { id: 'teletoon', name: 'Teletoon', networkId: 145, query: 'Total Drama', description: 'Serious about cartoons' }
+    { id: 'teletoon', name: 'Teletoon', networkId: 145, query: 'Total Drama', description: 'Serious about cartoons' },
+    { id: 'power-rangers', name: 'Power Rangers', networkId: null, query: 'Power Rangers', description: 'All Legacy & Modern Seasons' }
 ];
 
 export default function Channels() {
@@ -33,11 +34,73 @@ export default function Channels() {
                 data = await fetchApi('/discover/tv', { with_networks: selectedChannel.networkId, sort_by: 'popularity.desc' });
             }
             if (!data || !data.results || data.results.length === 0) {
-                data = await fetchApi('/search/tv', { query: selectedChannel.query });
+                // Fetch deep for Power Rangers: Both TV and Movies across multiple pages
+                if (selectedChannel.id === 'power-rangers') {
+                    const allResults = [];
+                    // Fetch TV Shows (More pages)
+                    for (let p = 1; p <= 8; p++) {
+                        const pageData = await fetchApi('/search/tv', { query: selectedChannel.query, page: p });
+                        if (pageData && pageData.results) {
+                            allResults.push(...pageData.results.map(i => ({ ...i, media_type: 'tv' })));
+                            if (pageData.total_pages <= p) break;
+                        } else { break; }
+                    }
+                    // Fetch Movies too!
+                    for (let p = 1; p <= 3; p++) {
+                        const pageData = await fetchApi('/search/movie', { query: selectedChannel.query, page: p });
+                        if (pageData && pageData.results) {
+                            allResults.push(...pageData.results.map(i => ({ ...i, media_type: 'movie' })));
+                            if (pageData.total_pages <= p) break;
+                        } else { break; }
+                    }
+                    data = { results: allResults };
+                } else {
+                    data = await fetchApi('/search/tv', { query: selectedChannel.query });
+                }
             }
             if (data && data.results) {
-                setItems(data.results);
-                setActiveHero(data.results[0]);
+                let sortedResults = [...data.results];
+                // If Power Rangers, sort by oldest first to show "from starting"
+                if (selectedChannel.id === 'power-rangers') {
+                    // Comprehensive filtering
+                    sortedResults = sortedResults.filter(item => {
+                        const name = (item.name || item.title || item.original_name || '').toLowerCase();
+                        const matchesName = name.includes('power rangers') || name.includes('powerrangers') || name.includes('power ranger');
+                        const hasImage = item.poster_path || item.backdrop_path;
+                        return matchesName && hasImage;
+                    });
+                    
+                    // Strict Deduplication
+                    const seenMetadata = new Set();
+                    sortedResults = sortedResults.filter(item => {
+                        const title = (item.name || item.title || '').toLowerCase().trim();
+                        const year = (item.first_air_date || item.release_date || '').slice(0, 4);
+                        const id = item.id;
+                        const type = item.media_type;
+                        
+                        // Create multiple unique keys to catch all forms of duplication
+                        const keys = [
+                            `${type}-${id}`, // Same entry on different search pages
+                            `${title}-${year}` // Same show entry under different IDs (rare but happens in TMDB)
+                        ];
+
+                        for (const key of keys) {
+                            if (seenMetadata.has(key)) return false;
+                        }
+                        
+                        keys.forEach(key => seenMetadata.add(key));
+                        return true;
+                    });
+
+                    // Sort chronologically
+                    sortedResults.sort((a, b) => {
+                        const dateA = (a.first_air_date || a.release_date) ? new Date(a.first_air_date || a.release_date) : new Date('9999-12-31');
+                        const dateB = (b.first_air_date || b.release_date) ? new Date(b.first_air_date || b.release_date) : new Date('9999-12-31');
+                        return dateA - dateB;
+                    });
+                }
+                setItems(sortedResults);
+                setActiveHero(sortedResults[0]);
             }
             setLoading(false);
         };
@@ -101,9 +164,9 @@ export default function Channels() {
                     {activeHero ? (
                         <section className="relative h-[40vh] md:h-[55vh] overflow-hidden">
                             <img
-                                src={activeHero.backdrop_path ? getImageUrl(activeHero.backdrop_path, 'original') : (activeHero.poster_path ? getImageUrl(activeHero.poster_path, 'w500') : '')}
+                                src={getImageUrl(activeHero.backdrop_path || activeHero.poster_path, 'original')}
                                 alt=""
-                                className="absolute inset-0 w-full h-full object-cover opacity-50"
+                                className="absolute inset-0 w-full h-full object-cover opacity-50 transition-opacity duration-1000"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/40 to-transparent"></div>
                             <div className="absolute inset-0 bg-gradient-to-r from-[#080808] via-transparent to-transparent"></div>

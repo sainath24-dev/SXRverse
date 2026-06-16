@@ -41,6 +41,7 @@ function AppContent() {
   const isFeed = location.pathname === '/feed';
   const isMangaReader = location.pathname.startsWith('/manga/read/');
   const isNowPlaying = location.pathname === '/now-playing';
+  const isMusic = location.pathname === '/music';
 
   // Global effect to scroll to top on route change
   useEffect(() => {
@@ -67,13 +68,13 @@ function AppContent() {
       )}
 
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 min-w-0 ${!isPartyRoom && !isMangaReader && !isFeed && !isNowPlaying ? 'md:pl-64' : ''}`}>
-        {!isPartyRoom && !isMangaReader && !isNowPlaying && (
+        {!isPartyRoom && !isMangaReader && !isNowPlaying && !isMusic && (
           <Navbar 
             onMenuClick={() => setSidebarOpen(true)} 
             isSidebarHidden={isPartyRoom || isMangaReader || isFeed || isNowPlaying}
           />
         )}
-        <main className={`flex-1 ${!isNowPlaying ? 'pt-14 md:pt-20' : ''} ${!isPartyRoom && !isChannels && !isMangaReader && !isFeed && !isNowPlaying ? 'pb-10' : ''}`}>
+        <main className={`flex-1 ${!isNowPlaying && !isMusic ? 'pt-14 md:pt-20' : ''} ${!isPartyRoom && !isChannels && !isMangaReader && !isFeed && !isNowPlaying ? 'pb-10' : ''}`}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/anime" element={<Anime />} />

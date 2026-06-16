@@ -89,184 +89,111 @@ export default function Navbar({ onMenuClick, isSidebarHidden }) {
     };
 
     return (
-        <nav className={`fixed top-0 ${isSidebarHidden ? 'left-0' : 'left-0 md:left-64'} right-0 z-[100]`}>
-            <div className="transition-all duration-500 bg-[#0a0a0a] border-b border-white/[0.06]">
-
-                {/* Mobile Search Overlay */}
-                {mobileSearch && (
-                    <div className="fixed inset-0 bg-[#0a0a0a] z-[300] md:hidden">
-                        <div className="flex items-center px-3 gap-3 h-14 border-b border-white/10">
-                            <button onClick={() => { setMobileSearch(false); setQuery(''); setShowSuggestions(false); }} className="shrink-0 w-10 h-10 flex items-center justify-center text-white/60 active:scale-90">
-                                <ArrowLeft size={22} />
-                            </button>
-                            <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-                                <input
-                                    ref={mobileInputRef}
-                                    type="text"
-                                    placeholder="Search movies, shows, anime..."
-                                    className="flex-1 bg-white/10 border border-white/10 rounded-lg text-sm px-4 py-2.5 outline-none focus:border-[#1db954]/50 text-white placeholder-white/30"
-                                    value={query}
-                                    onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
-                                    autoFocus
-                                />
-                                <button type="submit" className="shrink-0 px-4 py-2 bg-[#1db954] text-black rounded-lg text-xs font-black uppercase">Go</button>
-                            </form>
-                        </div>
-
-                        {/* Mobile search results */}
-                        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
-                            {loading && (
-                                <div className="p-8 text-center text-xs text-white/30 animate-pulse">Searching...</div>
-                            )}
-                            {!loading && suggestions.length > 0 && suggestions.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => { setQuery(''); setShowSuggestions(false); setMobileSearch(false); navigate(`/watch/${item.media_type}/${item.id}`); }}
-                                    className="w-full flex items-center gap-4 px-4 py-3.5 active:bg-white/5 text-left border-b border-white/[0.04]"
-                                >
-                                    <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0 bg-white/5">
-                                        <img src={getImageUrl(item.poster_path, 'w92')} alt="" className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="text-white text-sm font-bold truncate">{item.title || item.name}</div>
-                                        <div className="text-xs text-white/30 uppercase mt-0.5">{item.media_type} • {(item.release_date || item.first_air_date || '').slice(0, 4)}</div>
-                                    </div>
-                                </button>
-                            ))}
-                            {!loading && query.length > 2 && suggestions.length === 0 && (
-                                <div className="p-8 text-center text-xs text-white/20">No results found</div>
-                            )}
-                            {query.length <= 2 && (
-                                <div className="p-8 text-center text-xs text-white/20">Type at least 3 characters to search</div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Main Navbar Row */}
-                <div className="h-14 md:h-20 flex items-center justify-between px-3 md:px-8">
+        <nav className={`fixed top-0 ${isSidebarHidden ? 'left-0' : 'left-0 md:left-64'} right-0 z-[100] transition-all duration-500 ${isScrolled ? 'bg-[#0b0b0b]/80 backdrop-blur-3xl py-2 md:py-3 border-b border-white/5 shadow-2xl' : 'bg-transparent py-4 md:py-6'}`}>
+            <div className="max-w-[1920px] mx-auto px-4 md:px-10 flex items-center justify-between gap-6">
+                
+                {/* Desktop Search */}
+                <div className="hidden md:flex flex-1 max-w-2xl relative group" ref={suggestionsRef}>
+                    <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${query ? 'text-primary' : 'text-white/20'}`} size={18} />
+                    <form onSubmit={handleSearch} className="w-full">
+                        <input
+                            type="text"
+                            placeholder="SEARCH MOVIES, SHOWS, MUSIC..."
+                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-16 pr-6 text-[11px] font-black tracking-widest text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-primary/30 transition-all uppercase"
+                            value={query}
+                            onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
+                        />
+                    </form>
                     
-                    {/* Left side */}
-                    <div className="flex items-center gap-2 md:gap-12 min-w-0">
-                        {/* Mobile: Menu + Back + Title */}
-                        <div className="flex xl:hidden items-center gap-2 min-w-0">
-                            <button 
-                                onClick={onMenuClick} 
-                                className="shrink-0 w-10 h-10 flex items-center justify-center bg-white/10 rounded-lg text-white active:scale-90 transition-transform"
-                            >
-                                <Menu size={20} />
-                            </button>
-                            {!isHome && (
-                                <button 
-                                    onClick={() => navigate(-1)} 
-                                    className="shrink-0 w-10 h-10 flex items-center justify-center bg-white/10 rounded-lg text-white active:scale-90 transition-transform"
-                                >
-                                    <ArrowLeft size={18} />
-                                </button>
-                            )}
-                            <span className="text-sm font-black uppercase tracking-tight text-white truncate">
-                                {getPageTitle()}
-                            </span>
-                        </div>
-
-
-                        {/* Desktop: Logo (only when sidebar is hidden) */}
-                        {isSidebarHidden && (
-                            <Link to="/" className="group hidden xl:flex flex-col items-start shrink-0">
-                                <h1 className="text-xl font-black italic tracking-tighter text-white uppercase leading-none group-hover:text-[#1db954] transition-colors">SXR VERSE</h1>
-                                <span className="text-[6px] font-black tracking-[0.4em] text-[#1db954] uppercase mt-0.5 opacity-60">Version 4.2</span>
-                            </Link>
-                        )}
-
-                        {/* Desktop: Nav Links */}
-                        <div className="hidden xl:flex items-center gap-1">
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
-                                        isActive(link.path)
-                                            ? 'text-black bg-[#1db954]'
-                                            : link.highlight
-                                            ? 'text-[#1db954] hover:bg-[#1db954]/10'
-                                            : 'text-white/40 hover:text-white hover:bg-white/5'
-                                    }`}
-                                >
-                                    {link.name}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Right side */}
-                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                        {/* Mobile: Search icon */}
-                        <button 
-                            onClick={() => setMobileSearch(true)} 
-                            className="md:hidden w-10 h-10 flex items-center justify-center bg-white/[0.06] rounded-lg text-white/40 active:scale-90 transition-transform"
-                        >
-                            <Search size={18} />
-                        </button>
-
-                        {/* Desktop: Search bar */}
-                        <div className="relative group hidden md:block" ref={suggestionsRef}>
-                            <form onSubmit={handleSearch} className="relative flex items-center">
-                                <input
-                                    type="text"
-                                    placeholder="SEARCH..."
-                                    className="bg-white/[0.06] border border-white/[0.08] rounded-xl text-[9px] font-black uppercase tracking-[0.2em] pl-9 pr-4 py-2.5 w-40 lg:w-56 xl:w-64 focus:w-72 transition-all duration-500 outline-none focus:border-[#1db954]/50 focus:bg-white/[0.08] text-white placeholder-white/20"
-                                    value={query}
-                                    onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
-                                />
-                                <Search size={12} className="absolute left-3 text-white/20 group-focus-within:text-[#1db954] transition-colors" />
-                            </form>
-
-                            {showSuggestions && query.length > 2 && (suggestions.length > 0 || loading) && (
-                                <div className="absolute top-full left-0 right-0 mt-3 bg-[#0f0f0f]/95 backdrop-blur-3xl border border-white/[0.06] rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.8)] p-2 z-[110] min-w-[320px]">
-                                     {loading ? (
-                                        <div className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-white/20 animate-pulse">Searching...</div>
-                                     ) : (
-                                        <div className="space-y-1">
-                                            {suggestions.map((item) => (
-                                                <button
-                                                    key={item.id}
-                                                    onClick={() => { setQuery(''); setShowSuggestions(false); navigate(`/watch/${item.media_type}/${item.id}`); }}
-                                                    className="w-full flex items-center gap-3 p-2.5 hover:bg-white/5 rounded-xl transition-all text-left group"
-                                                >
-                                                    <div className="w-9 aspect-[2/3] rounded-lg overflow-hidden shrink-0 border border-white/5">
-                                                         <img src={getImageUrl(item.poster_path, 'w92')} alt="" className="w-full h-full object-cover" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="text-white text-[11px] font-black uppercase tracking-tight truncate mb-0.5 group-hover:text-[#1db954] transition-colors">{item.title || item.name}</h4>
-                                                        <span className="text-[8px] font-black text-[#1db954] uppercase tracking-widest">{item.media_type} • {(item.release_date || item.first_air_date || '').slice(0, 4)}</span>
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                     )}
+                    {/* Search suggestions */}
+                    {showSuggestions && query.length > 2 && (suggestions.length > 0 || loading) && (
+                        <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-[#121212] border border-white/10 rounded-3xl overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)] animate-entrance p-2 z-[200]">
+                            {loading ? (
+                                <div className="p-10 flex flex-col items-center gap-4">
+                                    <Loader2 className="animate-spin text-primary" size={24} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Analyzing Database...</span>
+                                </div>
+                            ) : (
+                                <div className="grid gap-1">
+                                    {suggestions.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => { setQuery(''); setShowSuggestions(false); navigate(`/watch/${item.media_type}/${item.id}`); }}
+                                            className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group text-left"
+                                        >
+                                            <div className="w-12 h-16 rounded-xl overflow-hidden border border-white/5 shrink-0">
+                                                <img src={getImageUrl(item.poster_path, 'w92')} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-sm font-black text-white uppercase truncate">{item.title || item.name}</h4>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                     <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{item.media_type}</span>
+                                                     <div className="w-1 h-1 bg-white/10 rounded-full"></div>
+                                                     <span className="text-[9px] font-bold text-primary">{(item.release_date || item.first_air_date || '').slice(0, 4)}</span>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
                                 </div>
                             )}
                         </div>
+                    )}
+                </div>
 
-                        {/* Bell - desktop only */}
-                        <button className="hidden lg:flex relative p-2.5 text-white/25 hover:text-[#1db954] transition-all bg-white/[0.04] rounded-xl hover:bg-[#1db954]/10 border border-white/[0.04]">
-                            <Bell size={17} />
-                            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#ff4d4d] rounded-full animate-pulse" />
-                        </button>
-                        
-                        {/* User avatar */}
-                        {user ? (
-                            <Link to="/profile" className="shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl overflow-hidden border border-white/10">
-                                <ProfileAvatar user={user} size="sm" />
-                            </Link>
-                        ) : (
-                            <Link to="/auth" className="hidden md:flex items-center gap-2 bg-[#1db954] text-black px-4 py-2 rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-white transition-all">
-                                 <Sparkles size={12} /> Sign In
-                            </Link>
-                        )}
+                {/* Right side actions */}
+                <div className="flex items-center gap-3 md:gap-6 ml-auto">
+                    {/* Mobile: Search + Menu */}
+                    <div className="flex md:hidden items-center gap-3">
+                         <button onClick={() => setMobileSearch(true)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60">
+                             <Search size={20} />
+                         </button>
+                         <button onClick={onMenuClick} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60">
+                             <Menu size={20} />
+                         </button>
                     </div>
+
+                    <button className="hidden sm:flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all group">
+                         <Bell size={18} className="group-hover:rotate-12 transition-transform" />
+                         <span className="text-[10px] font-black uppercase tracking-widest">Feed</span>
+                    </button>
+
+                    {user ? (
+                        <Link to="/profile" className="flex items-center gap-4 group">
+                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-primary to-primaryDark p-[1px] group-hover:rotate-[10deg] transition-all">
+                                 <div className="w-full h-full rounded-[15px] bg-[#0b0b0b] flex items-center justify-center overflow-hidden">
+                                     <ProfileAvatar user={user} size="sm" />
+                                 </div>
+                             </div>
+                        </Link>
+                    ) : (
+                        <Link to="/auth" className="bg-primary hover:bg-white text-black px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all hover:scale-105 active:scale-95">
+                            Sign In
+                        </Link>
+                    )}
                 </div>
             </div>
+
+            {/* Mobile Search Overlay */}
+            {mobileSearch && (
+                <div className="fixed inset-0 bg-[#0b0b0b] z-[300] md:hidden p-4 animate-entrance">
+                    <div className="flex items-center gap-4 mb-8">
+                         <button onClick={() => setMobileSearch(false)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60">
+                             <ArrowLeft size={20} />
+                         </button>
+                         <div className="flex-1 relative">
+                              <input
+                                 ref={mobileInputRef}
+                                 type="text"
+                                 placeholder="SEARCH..."
+                                 className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-xs font-bold text-white uppercase outline-none focus:border-primary/40 ring-0"
+                                 value={query}
+                                 onChange={(e) => setQuery(e.target.value)}
+                              />
+                              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
+                         </div>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }

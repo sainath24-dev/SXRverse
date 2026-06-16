@@ -132,6 +132,15 @@ export function MusicProvider({ children }) {
     setRepeatMode(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none');
   }, []);
 
+  const stopMusic = useCallback(() => {
+    audio.pause();
+    audio.src = '';
+    setCurrentSong(null);
+    setQueue([]);
+    setQueueIndex(0);
+    setIsPlaying(false);
+  }, []);
+
   const addToQueue = useCallback((song) => {
     setQueue(q => [...q, song]);
   }, []);
@@ -199,7 +208,7 @@ export function MusicProvider({ children }) {
       volume, setVolume, isMuted, setIsMuted,
       isLoading, isShuffled, setIsShuffled,
       repeatMode, cyclRepeat,
-      playSong, togglePlay,
+      playSong, togglePlay, stopMusic,
       handleNext: () => handleNext(false),
       handlePrev, seek, addToQueue,
       sleepTimer, startSleepTimer, clearSleepTimer,

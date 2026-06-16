@@ -7,22 +7,46 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0a0a0a', // True cinematic black
-        surface: '#121212',    // Layered surface
-        card: '#1a1a1a',       //深黑色
-        primary: '#ffffff',    // Pure white for high contrast
-        accent: '#c5a059',     // Editorial Gold/Champagne
-        softAccent: '#8e9196', // Muted slate for hierarchy
-        textMain: '#f8f8f8',   // Slightly off-white
-        textMuted: '#a1a1aa',  // Zinc 400
+        background: '#0b0b0b',
+        primary: '#1db954',
+        accent: '#ff4d4d',
+        secondaryAccent: '#2d5da1',
+        text: '#ffffff',
+        textMuted: '#a7a7a7',
+        border: '#ffffff15',
+        card: '#181818',
+        muted: '#282828',
+        // Playful Geometric Scope Colors
+        playful: {
+          bg: '#FFFDF5',
+          fg: '#1E293B',
+          muted: '#F1F5F9',
+          mutedFg: '#64748B',
+          accent: '#8B5CF6',
+          accentFg: '#FFFFFF',
+          secondary: '#F472B6',
+          tertiary: '#FBBF24',
+          quaternary: '#34D399',
+          border: '#E2E8F0',
+          input: '#FFFFFF',
+          card: '#FFFFFF',
+          ring: '#8B5CF6',
+        }
       },
       fontFamily: {
-        heading: ['"Outfit"', 'sans-serif'],
-        body: ['"Inter"', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
+        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'cinematic-overlay': 'linear-gradient(to top, rgba(10,10,10,1) 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0) 100%)',
+      boxShadow: {
+        'pop-sm': '2px 2px 0px #1E293B',
+        'pop-md': '4px 4px 0px #1E293B',
+        'pop-lg': '6px 6px 0px #1E293B',
+      },
+      borderRadius: {
+        'large': '24px',
+        'medium': '16px',
+        'small': '8px',
       }
     },
   },

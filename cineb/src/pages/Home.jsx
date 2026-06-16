@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchApi, getImageUrl } from '../api';
 import MovieCard from '../components/MovieCard';
 import MovieSkeleton from '../components/MovieSkeleton';
-import { Play, Plus, Info, Zap, ArrowRight, Star, Calendar, Clock } from 'lucide-react';
+import { Play, Plus, Info, Zap, ArrowRight, Star, Clock, Calendar, Heart, ShieldQuestion as Headphones, Compass, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Home() {
@@ -35,66 +35,90 @@ export default function Home() {
         loadData();
     }, []);
 
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good Morning';
+        if (hour < 18) return 'Good Afternoon';
+        return 'Good Evening';
+    };
+
     return (
-        <div className="min-h-screen bg-[#0b0b0b] text-white selection:bg-[#1db954] selection:text-black pb-20">
-            {/* Immersive Hero (Image 4 Naruto/Stranger Things style) */}
-            {featured && (
-                <section className="relative h-[70vh] md:h-[85vh] w-full flex items-end overflow-hidden group -mt-14 md:-mt-20">
-                    <div className="absolute inset-0">
-                        <img
-                            src={getImageUrl(featured.backdrop_path, 'original')}
-                            className="w-full h-full object-cover transition-transform duration-[5000ms] group-hover:scale-110 ease-out"
-                            alt=""
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0b] via-[#0b0b0b]/40 to-transparent"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0b] via-transparent to-transparent"></div>
-                    </div>
+        <div className="min-h-screen bg-[#0b0b0b] text-white selection:bg-[#1db954] selection:text-black pb-40">
+            {/* Top Navigation Spacing */}
+            <div className="h-20"></div>
 
-                    <div className="relative z-10 w-full max-w-[1920px] mx-auto px-4 md:px-16 pb-10 md:pb-20 animate-entrance">
-                        <div className="flex flex-col gap-6 max-w-4xl">
-                            <div className="flex items-center gap-3">
-                                <span className="bg-[#1db954] text-black px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg">
-                                    {featured.media_type === 'movie' ? 'FILM' : 'SERIAL'}
-                                </span>
-                                <div className="h-[1px] w-12 bg-white/20"></div>
-                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/60 tracking-widest uppercase">
-                                     <Star size={10} className="text-[#1db954] fill-[#1db954]" />
-                                     {featured.vote_average?.toFixed(1)} Rating
-                                </div>
-                            </div>
-
-                            <h1 className="text-[clamp(2.5rem,10vw,8rem)] font-black italic uppercase tracking-tighter leading-[0.85] text-white drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-                                {featured.title || featured.name}
-                            </h1>
-
-                            <p className="text-white/70 text-base md:text-xl leading-relaxed max-w-2xl line-clamp-2 opacity-80 font-medium tracking-tight mb-8">
-                                {featured.overview}
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row gap-6">
-                                <Link to={`/watch/${featured.media_type}/${featured.id}`} className="bg-[#1db954] text-black px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all duration-500 hover:bg-white hover:scale-105 shadow-2xl flex items-center justify-center gap-3 active:scale-95">
-                                    <Play size={18} fill="currentColor" /> Watch Now
+            <main className="max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 space-y-12">
+                
+                {/* Spotify Dashboard Header */}
+                <section className="animate-entrance">
+                    <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-8 mb-8">{getGreeting()}</h1>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                        {loading 
+                            ? Array.from({length: 8}).map((_, i) => <div key={i} className="h-20 bg-white/5 rounded-lg animate-pulse"></div>)
+                            : [...dailyFilms.slice(0, 4), ...popularTv.slice(0, 4)].map((item, idx) => (
+                                <Link 
+                                    key={item.id + idx} 
+                                    to={`/watch/${item.media_type || (idx < 4 ? 'movie' : 'tv')}/${item.id}`}
+                                    className="group relative flex items-center gap-4 bg-white/[0.03] backdrop-blur-md rounded-lg overflow-hidden border border-white/[0.05] hover:bg-white/[0.08] transition-all duration-300 shadow-lg"
+                                >
+                                    <div className="w-20 h-20 flex-shrink-0 shadow-2xl">
+                                        <img src={getImageUrl(item.poster_path, 'w185')} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0 pr-4">
+                                        <p className="text-sm font-bold truncate leading-tight uppercase tracking-wide">
+                                            {item.title || item.name}
+                                        </p>
+                                    </div>
+                                    <div className="mr-4 w-12 h-12 bg-[#1db954] rounded-full flex items-center justify-center shadow-[0_8px_16px_rgba(29,185,84,0.3)] opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                        <Play fill="black" size={20} className="ml-1 text-black" />
+                                    </div>
                                 </Link>
-                                <Link to={`/watch/${featured.media_type}/${featured.id}`} className="bg-white/5 backdrop-blur-3xl border border-white/10 text-white px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all duration-500 hover:bg-white/10 hover:scale-105 flex items-center justify-center gap-3">
-                                    <Info size={18} /> Description
-                                </Link>
-                            </div>
-                        </div>
+                            ))
+                        }
                     </div>
                 </section>
-            )}
 
-            <div className="max-w-[1920px] mx-auto px-4 md:px-8 lg:px-16 space-y-16 md:space-y-32 mt-10">
-                {/* Filmy Dnia (Image 4 Style Grid) */}
-                <section>
-                    <div className="flex items-center justify-between mb-12">
-                        <div className="flex items-center gap-4">
-                             <div className="w-1.5 h-8 bg-[#1db954] rounded-full shadow-[0_0_15px_rgba(255,204,0,0.4)]"></div>
-                             <h2 className="text-3xl font-black uppercase tracking-tighter text-white">Movies of the Day</h2>
+                {/* Hero Feature Banner - Less intense than full screen */}
+                {featured && !loading && (
+                    <section className="relative h-[400px] md:h-[500px] rounded-3xl overflow-hidden group shadow-2xl animate-entrance border border-white/5">
+                        <img
+                            src={getImageUrl(featured.backdrop_path, 'original')}
+                            className="absolute inset-0 w-full h-full object-cover grayscale-[0.2] transition-transform duration-[5000ms] group-hover:scale-105"
+                            alt=""
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                        <div className="relative h-full flex flex-col justify-end p-8 md:p-16">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="bg-[#1db954] text-black px-3 py-1 rounded text-[10px] font-black uppercase">Trending Now</span>
+                                <span className="bg-white/10 backdrop-blur-md text-white/60 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border border-white/10">Featured</span>
+                            </div>
+                            <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-6 max-w-4xl italic">{featured.title || featured.name}</h2>
+                            <div className="flex gap-4">
+                                <Link to={`/watch/${featured.media_type}/${featured.id}`} className="bg-[#1db954] hover:bg-[#1ed760] text-black px-10 py-4 rounded-full font-black uppercase text-xs transition-all flex items-center gap-3 active:scale-95 shadow-xl">
+                                    <Play size={18} fill="currentColor" /> Stream
+                                </Link>
+                                <button className="bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white px-10 py-4 rounded-full font-black uppercase text-xs transition-all">
+                                    <Plus size={18} /> Add to Watchlist
+                                </button>
+                            </div>
                         </div>
+                    </section>
+                )}
+
+                {/* Grid Rows - Discovery Mode */}
+                <section className="pt-10">
+                    <div className="flex items-end justify-between mb-8">
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-widest text-white border-l-4 border-[#1db954] pl-4 mb-2 italic">Critics Choices</h2>
+                            <p className="text-white/40 text-sm font-medium">Top picks from the global cinema scene.</p>
+                        </div>
+                        <Link to="/movies" className="text-xs font-black uppercase tracking-widest text-white/40 hover:text-[#1db954] transition-colors flex items-center gap-2 group">
+                            Explore All <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10">
                         {loading 
                             ? Array.from({length: 5}).map((_, i) => <MovieSkeleton key={i} />)
                             : dailyFilms.slice(0, 5).map((item, idx) => (
@@ -106,16 +130,18 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Popularne Seriale */}
                 <section>
-                    <div className="flex items-center justify-between mb-12">
-                        <div className="flex items-center gap-4">
-                             <div className="w-1.5 h-8 bg-[#ff4d4d] rounded-full shadow-[0_0_15px_rgba(255,77,77,0.4)]"></div>
-                             <h2 className="text-3xl font-black uppercase tracking-tighter text-white">Popular Shows</h2>
+                    <div className="flex items-end justify-between mb-8">
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-widest text-white border-l-4 border-[#ff4d4d] pl-4 mb-2 italic">Prime Time</h2>
+                            <p className="text-white/40 text-sm font-medium">Shows that everyone is talking about.</p>
                         </div>
+                        <Link to="/anime" className="text-xs font-black uppercase tracking-widest text-white/40 hover:text-[#ff4d4d] transition-colors flex items-center gap-2 group">
+                            Full Lineup <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-10">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10">
                         {loading 
                             ? Array.from({length: 5}).map((_, i) => <MovieSkeleton key={i} />)
                             : popularTv.slice(0, 5).map((item, idx) => (
@@ -127,71 +153,68 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Nowości Filmowe (Image 4 bottom list style) */}
-                <section className="pb-40">
-                    <div className="flex items-center justify-between mb-12 border-b border-white/5 pb-8">
-                        <div className="flex items-center gap-4">
-                             <div className="w-1.5 h-8 bg-white rounded-full"></div>
-                             <h2 className="text-3xl font-black uppercase tracking-tighter text-white">New Releases</h2>
+                {/* Spotify-style New Arrivals List */}
+                <section className="pb-20">
+                     <div className="mb-10 flex items-center gap-4">
+                        <div className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl">
+                             <Compass size={24} className="text-[#1db954]" />
                         </div>
-                    </div>
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-tighter">Next Discoveries</h2>
+                            <p className="text-white/30 text-xs font-bold uppercase tracking-widest">Fresh drops arriving in your orbit</p>
+                        </div>
+                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-16 gap-y-8">
-                        {loading 
-                            ? Array.from({length: 9}).map((_, i) => <div key={i} className="h-28 bg-white/5 rounded-2xl animate-pulse"></div>)
-                            : newArrivals.map((item, idx) => (
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                         {loading 
+                            ? Array.from({length: 6}).map((_, i) => <div key={i} className="h-24 bg-white/5 rounded-2xl"></div>)
+                            : newArrivals.slice(0, 6).map((item, idx) => (
                                 <Link 
                                     key={item.id} 
                                     to={`/watch/movie/${item.id}`} 
-                                    className="flex items-center gap-6 group p-4 rounded-3xl transition-all duration-500 hover:bg-white/[0.03] animate-entrance"
-                                    style={{ animationDelay: `${idx * 50}ms` }}
+                                    className="flex items-center gap-5 p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/10 transition-all group"
                                 >
-                                    <div className="relative w-24 h-32 flex-shrink-0 rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
-                                        <img
-                                            src={getImageUrl(item.poster_path, 'w185')}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                            alt=""
-                                            loading="lazy"
-                                            decoding="async"
-                                        />
+                                    <div className="w-16 h-20 rounded-lg overflow-hidden shadow-xl shrink-0 group-hover:scale-105 transition-transform">
+                                        <img src={getImageUrl(item.poster_path, 'w185')} className="w-full h-full object-cover" alt="" />
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-2">
-                                             <span className="text-[9px] font-black text-[#1db954] uppercase tracking-widest">New Arrival</span>
-                                             <div className="w-1 h-1 bg-white/20 rounded-full"></div>
-                                             <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{item.release_date?.slice(0, 4)}</span>
+                                    <div className="flex-1 min-w-0 pr-2">
+                                        <h4 className="text-sm font-black uppercase tracking-tight truncate group-hover:text-[#1db954] transition-colors">{item.title}</h4>
+                                        <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-1 italic line-clamp-1">{item.overview}</p>
+                                        <div className="flex items-center gap-3 mt-3 text-[9px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60 transition-colors">
+                                            <span>{item.release_date?.slice(0,4)}</span>
+                                            <span className="w-1 h-1 bg-white/20 rounded-full"></span>
+                                            <span>New Release</span>
                                         </div>
-                                        <h3 className="text-[15px] font-black text-white uppercase tracking-tight truncate mb-2 group-hover:text-[#1db954] transition-colors">{item.title}</h3>
-                                        <p className="text-[11px] text-white/40 line-clamp-2 leading-relaxed h-[34px] group-hover:text-white/60 transition-colors">
-                                            {item.overview}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transform translate-x--4 group-hover:translate-x-0 transition-all duration-500">
-                                             <span className="text-[10px] font-black uppercase text-[#1db954] tracking-widest">Watch Now</span>
-                                             <ArrowRight size={12} className="text-[#1db954]" />
-                                        </div>
+                                    </div>
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <ArrowRight size={18} className="text-[#1db954]" />
                                     </div>
                                 </Link>
                             ))
-                        }
-                    </div>
+                         }
+                     </div>
                 </section>
-            </div>
+            </main>
 
-            {/* Tactical Footer Overlay */}
-            <footer className="px-4 md:px-16 py-8 md:py-12 border-t border-white/5 bg-[#080808]">
-                 <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-                     <div className="flex flex-col items-center md:items-start gap-4">
-                         <img src="/sxr-logo.png" alt="SXR Verse" className="h-8 w-auto object-contain" />
-                         <div className="flex gap-10 text-[9px] font-bold text-white/30 uppercase tracking-[0.3em]">
-                             <span>Terms of Use</span>
-                             <span>Privacy Statement</span>
-                             <span>System Access</span>
+            <footer className="mt-20 border-t border-white/5 bg-[#080808] py-20 px-4 md:px-12">
+                 <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
+                     <div className="space-y-6">
+                         <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 bg-[#1db954] rounded-xl flex items-center justify-center shadow-lg transform -rotate-12 group hover:rotate-0 transition-transform">
+                                 <Zap size={20} className="text-black" fill="black" />
+                             </div>
+                             <h2 className="text-2xl font-black text-white tracking-[0.2em] italic">SXR VERSE</h2>
+                         </div>
+                         <div className="flex gap-8 text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">
+                             <span className="hover:text-white cursor-pointer">Security</span>
+                             <span className="hover:text-white cursor-pointer">Protocol</span>
+                             <span className="hover:text-white cursor-pointer">Access</span>
                          </div>
                      </div>
-                     <div className="flex flex-col items-center md:items-end gap-4">
-                         <div className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">DESIGNED BY SAINATH</div>
-                         <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-[#1db954] shadow-inner">
-                             @sainath
+                     <div className="flex flex-col md:items-end gap-6">
+                         <div className="text-[10px] font-black uppercase tracking-[0.5em] text-white/10">STATION CONTROL @SAINATH</div>
+                         <div className="px-8 py-3 bg-white/[0.03] border border-white/5 rounded-full text-[10px] font-black text-[#1db954] uppercase tracking-widest shadow-inner">
+                             Status: Online
                          </div>
                      </div>
                  </div>
@@ -202,35 +225,27 @@ export default function Home() {
 
 function PosterNode({ item, type }) {
     return (
-        <Link to={`/watch/${type}/${item.id}`} className="group block relative w-full aspect-[2/3] rounded-3xl overflow-hidden shadow-2xl border border-white/5 transition-all duration-700 hover:scale-[1.03] hover:border-[#1db954]/40">
+        <Link to={`/watch/${type}/${item.id}`} className="group block relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/5 transition-all duration-500 hover:scale-[1.02] hover:border-[#1db954]/50 bg-black">
             <img
                 src={getImageUrl(item.poster_path, 'w500')}
-                className="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-110 ease-out"
+                className="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-110 ease-out opacity-80 group-hover:opacity-100"
                 alt=""
                 loading="lazy"
-                decoding="async"
             />
-            
-            {/* Year Badge (Image 4 Style) */}
+            {/* Year Badge */}
             <div className="absolute top-4 right-4 z-20">
-                <div className="bg-[#1db954] text-black px-3 py-1.5 rounded-xl text-[10px] font-black shadow-2xl transform transition-transform group-hover:scale-110">
+                <div className="bg-[#1db954] text-black px-2 py-1 rounded text-[9px] font-black shadow-2xl transform transition-transform group-hover:scale-110">
                     {(item.release_date || item.first_air_date || '').slice(0, 4)}
                 </div>
             </div>
-
-            {/* Hover Content */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="absolute bottom-6 left-6 right-6">
-                    <div className="flex items-center gap-2 mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                         <div className="w-1.5 h-1.5 bg-[#1db954] rounded-full"></div>
-                         <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">{item.media_type || type}</span>
-                    </div>
-                    <h3 className="text-base font-black text-white uppercase tracking-tight leading-tight translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-75">
+            {/* Hover Shadow Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500">
+                <div className="absolute bottom-5 left-5 right-5">
+                    <h3 className="text-sm font-black text-white uppercase tracking-tight leading-tight transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 italic">
                         {item.title || item.name}
                     </h3>
                 </div>
             </div>
-
         </Link>
     );
 }
