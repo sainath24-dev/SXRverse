@@ -1,19 +1,17 @@
-# SXRverse
+# SXRverse - Cineb
 
 A modern, dynamic web application providing a rich user experience for movies, channels, and music.
 
 ## 📸 Screenshots
 
-*(Replace the placeholders below with your actual image paths once you add them)*
+![Home Page](./cineb/src/assets/1.png)
+*Explore our dynamic home page with featured content.*
 
-![Home Page](./assets/screenshot-home.png)
-*Description of the home page and its features.*
+![Movies and Channels](./cineb/src/assets/2.png)
+*Seamlessly browse through movies and live channels.*
 
-![Movies/Channels](./assets/screenshot-movies.png)
-*Browsing movies and channels seamlessly.*
-
-![Music Player](./assets/screenshot-music.png)
-*Integrated music player experience.*
+![Music Player](./cineb/src/assets/3.png)
+*Enjoy an integrated music playback experience.*
 
 ## ✨ Features
 - **Movie Browsing**: Explore a wide range of movies.
